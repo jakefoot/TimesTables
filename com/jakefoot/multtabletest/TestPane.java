@@ -9,6 +9,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Random;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -22,10 +23,13 @@ public class TestPane extends JPanel
      */
     private static final long serialVersionUID = 7692304434779827184L;
     private int[][] scoretable = new int[Gui.max+1][Gui.max+1];
+    private int[][] filltable = new int[Gui.max+1][Gui.max+1];
     private int numright = 0;
     private int j;
     private int focrow;
     private int foccol;
+    private static int randrow;
+    private static int randcol;
     private int gvnans;
     public long tottime = 0;
     private float score;
@@ -33,6 +37,7 @@ public class TestPane extends JPanel
     private String highlighttxt;    
     private static final Color highlight = new Color(192,192,192);
     private boolean error = false;
+    private boolean isRandom;
     private static JTextField[][] fieldarray = new JTextField[Gui.max+1][Gui.max+1];
     public static JLabel timerlabel;
     public static Dimension celldimension = new Dimension(70, 30);
@@ -42,17 +47,30 @@ public class TestPane extends JPanel
         
     
     //constructor
-    public TestPane()
+    public TestPane(boolean tof)
     {
 	super();
+	isRandom = tof;
 	setLayout(new GridLayout(Gui.max+1, Gui.max+1, 2, 2));
 	setBackground(Color.BLACK);
 	createGrid(Gui.max);
-	//enableGrid();
 	fillHeaders(Gui.max);
 	addListeners(Gui.max);
 	initializeScore(Gui.max);
 	Gui.showScore(false);
+	if (isRandom)
+	{
+	    disableGrid();
+	    getRandom();
+	    Gui.enableSubmit(false);
+	    Gui.setHeaderText("Random Multiplication Table Test");
+	    filltable = scoretable;	    
+	}
+	else
+	{
+	    Gui.setHeaderText("Multiplication Table Test");
+	}
+	
     }   
 
     //METHODS
@@ -65,7 +83,6 @@ public class TestPane extends JPanel
 	   fieldarray[i][j].setFont(tablefont);
 	   fieldarray[i][j].setPreferredSize(celldimension);;
 	   fieldarray[i][j].setBorder(null);
-	   //fieldarray[i][j].setEditable(false);
 	   fieldarray[i][j].setBackground(Color.WHITE);
 	   fieldarray[i][j].setHorizontalAlignment(JTextField.CENTER);
 	   add(fieldarray[i][j]);	   
@@ -76,7 +93,6 @@ public class TestPane extends JPanel
 	       fieldarray[i][j].setFont(tablefont);
 	       fieldarray[i][j].setPreferredSize(celldimension);
 	       fieldarray[i][j].setBorder(null);
-	       //fieldarray[i][j].setEditable(false);
 	       fieldarray[i][j].setBackground(Color.WHITE);
 	       fieldarray[i][j].setHorizontalAlignment(JTextField.CENTER);	       
 	       add(fieldarray[i][j]);		   
@@ -93,8 +109,11 @@ public class TestPane extends JPanel
 	   for (int j = 1; j <= Gui.max; j++)
 	   {
 	       fieldarray[i][j].addActionListener(new FieldHandlerClass(i, j));
-	       fieldarray[i][j].addMouseListener(new MouseHandlerClass(i, j));
 	       fieldarray[i][j].addFocusListener(new FocusHandlerClass(i,j));
+	       if (!isRandom)
+	       {
+	       fieldarray[i][j].addMouseListener(new MouseHandlerClass(i, j));
+	       }
 	   }
 	}
     }    
@@ -129,7 +148,7 @@ public class TestPane extends JPanel
 	{
 	   for (int j = 1; j <= Gui.max; j++)
 	   {
-	       fieldarray[i][j].setEditable(true);	       
+	       fieldarray[i][j].setEnabled(true);	       
 	   }
 	}
     }
@@ -141,7 +160,7 @@ public class TestPane extends JPanel
 	{
 	   for (int j = 1; j <= Gui.max; j++)
 	   {
-	       fieldarray[i][j].setEditable(false);	       
+	       fieldarray[i][j].setEnabled(false);	       
 	   }
 	}
     }
@@ -180,12 +199,13 @@ public class TestPane extends JPanel
 		    }
 		    if (gvnans == answer)
 		    {
-			fieldarray[r][c].setForeground(Color.GREEN);
+			fieldarray[r][c].setDisabledTextColor(Color.GREEN);
+			fieldarray[r][c].setText(String.format("%d", gvnans));
 			scoretable[r][c] = 1;
 		    }
 		    else
 		    {
-			fieldarray[r][c].setForeground(Color.RED);
+			fieldarray[r][c].setDisabledTextColor(Color.RED);
 			fieldarray[r][c].setText(String.format("%d (%d)", gvnans, answer));
 			scoretable[r][c] = 0;
 		    }
@@ -206,7 +226,75 @@ public class TestPane extends JPanel
 	}	
 	score = (float)numright/((float)Gui.max*(float)Gui.max)*100;
 	Gui.setScore(score);	
-    }    
+    }
+    
+    //runs test in random mode
+    public void getRandom()
+    {
+	fieldarray[randrow][randcol].setBackground(Color.WHITE);
+	fieldarray[0][randcol].setBackground(Color.WHITE);
+	fieldarray[randrow][0].setBackground(Color.WHITE);
+	Random rand = new Random();
+	boolean unique = true;
+	//int randrow;
+	//int randcol;
+	if (!isTableFull())
+	{
+	do
+	{
+	    randrow = rand.nextInt(Gui.max) + 1;
+	    int rowtest = 0;
+	    for (int x = 1; x <= Gui.max; x++)
+	    {
+		rowtest += filltable[randrow][x];
+	    }
+	    if (rowtest < Gui.max)
+	    {
+		unique = true;
+	    }
+	    else
+	    {
+		unique = false;
+	    }	        
+	}
+	while (!unique);
+	
+	do
+	{
+	    randcol = rand.nextInt(Gui.max) + 1;
+	    if (filltable[randrow][randcol] == 0)
+	    {
+		unique = true;
+	    }
+	    else
+	    {
+		unique = false;
+	    }
+	}
+	while (!unique);
+	fieldarray[randrow][randcol].setEnabled(true);
+	fieldarray[randrow][randcol].requestFocus();
+	fieldarray[randrow][randcol].setBackground(Color.YELLOW);
+	fieldarray[0][randcol].setBackground(Color.YELLOW);
+	fieldarray[randrow][0].setBackground(Color.YELLOW);
+	}
+    }
+    
+    //checks if table is full
+    private boolean isTableFull()
+    {
+	boolean done = true;
+	for (int x = 1; x < filltable.length; x++)
+	{
+		for (int y = 1; y < filltable[x].length; y++)
+		{
+			if (filltable[x][y] == 0)
+			    done = false;
+		}
+	}	
+	return done;
+    }	
+    
 
 
     //EVENT HANDLER CLASSES
@@ -293,9 +381,12 @@ public class TestPane extends JPanel
 	    {
 		fieldarray[row][col].setText(String.format("%dx%d", row, col));
 	    }	    
-	    fieldarray[row][col].setBackground(Color.YELLOW);
-	    fieldarray[0][col].setBackground(Color.YELLOW);
-	    fieldarray[row][0].setBackground(Color.YELLOW);
+	    if (!isRandom)
+	    {
+		fieldarray[row][col].setBackground(Color.YELLOW);
+		fieldarray[0][col].setBackground(Color.YELLOW);
+		fieldarray[row][0].setBackground(Color.YELLOW);
+	    }
 	    fieldarray[row][col].selectAll();
 	    fieldtxt = "";
 	}
@@ -303,37 +394,65 @@ public class TestPane extends JPanel
 	public void focusLost(FocusEvent event)
 	{	    
 	    fieldtxt = fieldarray[row][col].getText();
+	    
+	    if (!isRandom)
+	    {
 	    fieldarray[row][col].setBackground(Color.WHITE);
 	    fieldarray[0][col].setBackground(Color.WHITE);
 	    fieldarray[row][0].setBackground(Color.WHITE);
+	    }
 	    
-	    if (fieldtxt.contains("x"))
+	    if (fieldtxt.contains("x") || fieldtxt.isEmpty())
 	    {
 		fieldarray[row][col].setText("");
-		fieldtxt = "";
+		fieldtxt = "";		
 	    }
 	    
 	    if (fieldarray[row][col].isEditable())
 	    {
-	    if (!fieldtxt.isEmpty())
-	    {
-	    try
-	    {
-		gvnans = Integer.valueOf(fieldtxt);		
-	    }
-	    catch (Exception e)
-	    {
-		error = true;		
-	    }
-	    if (error == true)
-	    {
-		JOptionPane.showMessageDialog(null, "Invalid entry. Please enter an integer value.", "Error", JOptionPane.ERROR_MESSAGE);
-		fieldarray[row][col].requestFocus();
-		error = false;
-	    }	    
-	    }
+	    
+		if (!fieldtxt.isEmpty())
+		{
+		    try
+		    {
+			gvnans = Integer.valueOf(fieldtxt);		
+		    }
+		    catch (Exception e)
+		    {
+			error = true;		
+		    }
+		    if (error == true)
+		    {
+			JOptionPane.showMessageDialog(null, "Invalid entry. Please enter an integer value.", "Error", JOptionPane.ERROR_MESSAGE);
+			fieldarray[row][col].requestFocus();
+			error = false;
+		    }
+		    else
+		    {
+			filltable[row][col] = 1;
+			if (isRandom)
+			{
+			    if (isTableFull())
+			    {
+				Gui.enableSubmit(true);		    
+			    }
+			    else
+			    {
+				fieldarray[row][col].setEnabled(false);
+				getRandom();		    
+			    }
+			}
+			else if (isTableFull())
+			{
+			    Gui.enableSubmit(true);
+			}
+			else
+			{
+			    fieldarray[row][col].transferFocus();
+			}
+		    }
+		}
 	    }
 	}
-    }
-	
+    }	
 }

@@ -10,7 +10,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -36,7 +35,7 @@ public class Gui extends JFrame
     private JPanel messagepane;
     private JLabel messagelabel;
     private JPanel buttonpane;
-    private JLabel headerlabel;
+    private static JLabel headerlabel;
     private static JButton startbutton;
     private static JButton resetbutton;
     private static JButton pausebutton;
@@ -55,7 +54,7 @@ public class Gui extends JFrame
     //constructor
     public Gui()
     {
-	super("Multiplication Table");
+	super("Multiplication Table Options");
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	
 	//define and add panes
@@ -129,7 +128,7 @@ public class Gui extends JFrame
 	buttonpane.add(submitbutton);
 	buttonpane.add(pausebutton);
 	buttonpane.add(resetbutton);
-	buttonpane.add(menubutton);	
+	buttonpane.add(menubutton);
 	
 	addListeners(max);
 	pack();
@@ -198,6 +197,12 @@ public class Gui extends JFrame
 	tottime = 0;
     }
     
+    //sets header text
+    public static void setHeaderText(String s)
+    {
+	headerlabel.setText(s);
+    }
+    
     //sets submitted to true or false
     public static void setSubmitted(boolean tof)
     {
@@ -205,10 +210,15 @@ public class Gui extends JFrame
     }
     
     //disables pause button
-    public static void disablePause()
+    public static void enablePause(boolean tof)
     {
-	pausebutton.setEnabled(false);
+	pausebutton.setEnabled(tof);
     }
+    
+    public static void enableSubmit(boolean tof)
+    {
+	submitbutton.setEnabled(tof);
+    }    
     
     //shows or hides score label
     public static void showScore(boolean tof)
@@ -254,17 +264,21 @@ public class Gui extends JFrame
 		    ops.setVisible(false);
 		    grid.setVisible(true);
 		    tablepane.add(grid);
-		    headerlabel.setText("Multiplication Table Practice");
 		    pack();
 		}
-		if (!ops.getPracticeSelection() && !ops.getRandomSelection())
+		if (!ops.getPracticeSelection())
 		{
-		    submitbutton.setEnabled(true);
-		    grid = new TestPane();
+		    if (ops.getRandomSelection())
+		    {
+			grid = new TestPane(true);
+		    }
+		    else
+		    {
+			grid = new TestPane(false);
+		    }
 		    ops.setVisible(false);
 		    grid.setVisible(true);
 		    tablepane.add(grid);
-		    headerlabel.setText("Multiplication Table Test");
 		    pack();
 		}		
 		paused = false;
@@ -291,8 +305,7 @@ public class Gui extends JFrame
 		    pauseTimer();
 		    messagelabel.setText("Paused... Click Pause to continue.");
 		    tablepane.setVisible(false);
-		    messagepane.setVisible(true);		    
-		    //initializeTimer();
+		    messagepane.setVisible(true);
 		    timer.displayTime(tottime);
 		    paused = true;
 		}
@@ -303,6 +316,7 @@ public class Gui extends JFrame
 		    messagepane.setVisible(false);
 		    startTimer();
 		    paused = false;
+		    menubutton.transferFocus();
 		}
 	    }
 	    if (event.getSource() == resetbutton)
@@ -322,7 +336,7 @@ public class Gui extends JFrame
 		    grid = null;
 		    paused = false;
 		    pausebutton.setEnabled(true);
-		    if (ops.getPracticeSelection() && !ops.getRandomSelection())
+		    if (ops.getPracticeSelection())
 		    {
 			grid = new PracticePane();
 			ops.setVisible(false);
@@ -330,19 +344,28 @@ public class Gui extends JFrame
 			tablepane.add(grid);
 			
 		    }
-		    if (!ops.getPracticeSelection() && !ops.getRandomSelection())
+		    if (!ops.getPracticeSelection())
 		    {			
-			grid = new TestPane();
+			if (ops.getRandomSelection())
+			    {
+				grid = new TestPane(true);
+			    }
+			    else
+			    {
+				grid = new TestPane(false);
+			    }
 			ops.setVisible(false);
 			grid.setVisible(true);
 			tablepane.add(grid);
-			submitbutton.setEnabled(true);
+			submitbutton.setEnabled(false);
+			
 		    }
 		}
+		menubutton.transferFocus();
 	    }
 	    if (event.getSource() == menubutton)
 	    {		
-		int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to return to the menu?\nAll progress will be lost", "Reset", JOptionPane.YES_NO_OPTION);
+		int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to return to the menu?\nAll progress will be lost", "Return To Menu", JOptionPane.YES_NO_OPTION);
 		
 		if(result == JOptionPane.YES_OPTION)
 		{		
@@ -360,7 +383,7 @@ public class Gui extends JFrame
 		    timerlabel.setForeground(Color.WHITE);
 		    tablepane.remove(grid);
 		    grid = null;
-		    headerlabel.setText("Multiplication Table");
+		    headerlabel.setText("Multiplication Table Options");
 		    setScore(0);
 		    pack();
 		}

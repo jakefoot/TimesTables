@@ -53,6 +53,7 @@ public class PracticePane extends JPanel
 	enableGrid();
 	initializeScore(Gui.max);
 	Gui.setScore(score);
+	Gui.setHeaderText("Multiplication Table Practice");
     }   
 
     //METHODS
@@ -197,7 +198,7 @@ public class PracticePane extends JPanel
 	{
 	    disableGrid();
 	    Gui.pauseTimer();
-	    Gui.disablePause();
+	    Gui.enablePause(false);;
 	    Gui.setSubmitted(true);
 	}	    
     }    

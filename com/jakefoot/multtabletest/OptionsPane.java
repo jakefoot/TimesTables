@@ -73,7 +73,6 @@ public class OptionsPane extends JPanel
 	randomselect.setFont(Gui.tablefont);
 	randomselect.setBackground(Color.WHITE);
 	randomselect.setToolTipText("A problem will be selected for you at random \nuntil table is completed.");
-	randomselect.setEnabled(false);//remove when random option is ready
 	checkpane.add(timerselect);
 	checkpane.add(randomselect);	
 	add(checkpane);
