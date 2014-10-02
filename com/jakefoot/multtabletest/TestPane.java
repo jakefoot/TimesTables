@@ -228,7 +228,7 @@ public class TestPane extends JPanel
 	Gui.setScore(score);	
     }
     
-    //runs test in random mode
+    //selects empty cell at random
     public void getRandom()
     {
 	fieldarray[randrow][randcol].setBackground(Color.WHITE);
@@ -236,8 +236,6 @@ public class TestPane extends JPanel
 	fieldarray[randrow][0].setBackground(Color.WHITE);
 	Random rand = new Random();
 	boolean unique = true;
-	//int randrow;
-	//int randcol;
 	if (!isTableFull())
 	{
 	do
@@ -274,9 +272,9 @@ public class TestPane extends JPanel
 	while (!unique);
 	fieldarray[randrow][randcol].setEnabled(true);
 	fieldarray[randrow][randcol].requestFocus();
-	fieldarray[randrow][randcol].setBackground(Color.YELLOW);
-	fieldarray[0][randcol].setBackground(Color.YELLOW);
-	fieldarray[randrow][0].setBackground(Color.YELLOW);
+	//fieldarray[randrow][randcol].setBackground(Color.YELLOW);
+	//fieldarray[0][randcol].setBackground(Color.YELLOW);
+	//fieldarray[randrow][0].setBackground(Color.YELLOW);
 	}
     }
     
@@ -381,12 +379,12 @@ public class TestPane extends JPanel
 	    {
 		fieldarray[row][col].setText(String.format("%dx%d", row, col));
 	    }	    
-	    if (!isRandom)
-	    {
+	    //if (!isRandom)
+	    //{
 		fieldarray[row][col].setBackground(Color.YELLOW);
 		fieldarray[0][col].setBackground(Color.YELLOW);
 		fieldarray[row][0].setBackground(Color.YELLOW);
-	    }
+	    //}
 	    fieldarray[row][col].selectAll();
 	    fieldtxt = "";
 	}
@@ -395,64 +393,64 @@ public class TestPane extends JPanel
 	{	    
 	    fieldtxt = fieldarray[row][col].getText();
 	    
-	    if (!isRandom)
-	    {
+	    //if (!isRandom)
+	    //{
 	    fieldarray[row][col].setBackground(Color.WHITE);
 	    fieldarray[0][col].setBackground(Color.WHITE);
 	    fieldarray[row][0].setBackground(Color.WHITE);
-	    }
-	    
+	    //}
 	    if (fieldtxt.contains("x") || fieldtxt.isEmpty())
 	    {
 		fieldarray[row][col].setText("");
 		fieldtxt = "";		
 	    }
-	    
-	    if (fieldarray[row][col].isEditable())
+	    if (fieldtxt.isEmpty() && isRandom)
 	    {
-	    
-		if (!fieldtxt.isEmpty())
+		fieldarray[row][col].setEnabled(false);
+	    }	    
+	    if (!fieldtxt.isEmpty())
+	    {
+		try		    
 		{
-		    try
+		gvnans = Integer.valueOf(fieldtxt);
+		error = false;
+		}
+		catch (Exception e)
+		{
+		    fieldarray[row][col].setText("");
+		    fieldtxt = "";
+		    JOptionPane.showMessageDialog(null, "Invalid entry. Please enter an integer value.", "Error", JOptionPane.ERROR_MESSAGE);
+		    error = true;		
+		}
+		if (error == true)
+		{		    
+		    fieldarray[row][col].requestFocus();
+		    error = false;
+		}
+		else
+		{
+		    filltable[row][col] = 1;
+		    if (isRandom)
 		    {
-			gvnans = Integer.valueOf(fieldtxt);		
-		    }
-		    catch (Exception e)
-		    {
-			error = true;		
-		    }
-		    if (error == true)
-		    {
-			JOptionPane.showMessageDialog(null, "Invalid entry. Please enter an integer value.", "Error", JOptionPane.ERROR_MESSAGE);
-			fieldarray[row][col].requestFocus();
-			error = false;
-		    }
-		    else
-		    {
-			filltable[row][col] = 1;
-			if (isRandom)
+			if (isTableFull())
 			{
-			    if (isTableFull())
-			    {
-				Gui.enableSubmit(true);		    
-			    }
-			    else
-			    {
-				fieldarray[row][col].setEnabled(false);
-				getRandom();		    
-			    }
-			}
-			else if (isTableFull())
-			{
-			    Gui.enableSubmit(true);
+			    Gui.enableSubmit(true);		    
 			}
 			else
 			{
-			    fieldarray[row][col].transferFocus();
+			    getRandom();		    
 			}
 		    }
+		    else if (isTableFull())
+		    {
+			Gui.enableSubmit(true);
+		    }
+		    else
+		    {
+			fieldarray[row][col].transferFocus();
+		    }
 		}
-	    }
+	    }	    
 	}
     }	
 }
